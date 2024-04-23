@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>File Management</title>  
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <script src="{% static 'js/file_mgtScript.js' %}"></script> 
+</head>  
+<body>  
+    <h1>File Management</h1>  
+    <h2>Current Directory: {{ current_dir_rel }}</h2>  
+    
+      
+    {% if current_dir_rel %}  
+        <a href="?path={{ parent_dir_rel }}">Back to parent directory</a>  
+    {% endif %}  
+
+    <form id="execute-command-form" method="post">  
+        {% csrf_token %}  
+        <input type="hidden" name="current_dir" value="{{ current_dir_rel }}">  
+        <label for="commandInput">Enter Command:</label>  
+        <input type="text" id="commandInput" name="command" required>  
+        <button type="submit">Execute</button>  
+    </form> 
+
+    <form id="bulk-delete-form" action="{% url 'file_bulk_delete' %}" method="post">  
+        {% csrf_token %}  
+        <input type="hidden" id="delete-paths" name="paths">  
+        <!-- Add a hidden field for the current directory -->  
+        <input type="hidden" name="current_dir" value="{{ current_dir_rel }}">  
+    </form> 
+      
+    <form id="bulk-download-form" action="{% url 'file_bulk_download' %}" method="post">  
+        {% csrf_token %}  
+        <input type="hidden" id="download-paths" name="paths">  
+    </form>  
+    
+
+    <div id="action-bar">  
+        <button id="delete-btn" onclick="deleteSelected()" style="display:none;">Delete</button>  
+        <button id="download-btn" onclick="downloadSelected()" style="display:none;">Download</button>  
+        <button id="rename-btn" onclick="renameSelected()" style="display:none;">Rename</button>  
+        <button id="download-folder-btn" onclick="downloadFolder()" style="display:none;">Download Folder</button>
+    </div> 
+  
+    <form id="file-upload-form" action="?path={{ current_dir_rel }}" method="post" enctype="multipart/form-data">  
+        {% csrf_token %}  
+        <label for="fileUpload">Upload files:</label>  
+        <input type="file" id="fileUpload" name="files[]" multiple>  
+        <button type="submit">Upload Files</button>  
+    </form>  
+      
+    <form id="folder-upload-form" action="{% url 'folder_upload' %}" method="post" enctype="multipart/form-data">  
+        {% csrf_token %}  
+        <input type="hidden" name="current_dir" value="{{ current_dir_rel }}">  
+        <label for="folderUpload">Upload folder:</label>  
+        <input type="file" id="folderUpload" name="folders" webkitdirectory directory multiple>  
+        <button type="submit">Upload Folder</button>  
+        <!-- ... rest of the form ... -->  
+    </form>  
+
+    <div id="progress-container" style="display:none;">  
+        <progress id="upload-progress" value="0" max="100"></progress>  
+        <span id="progress-percentage">0%</span>  
+    </div>  
+    
+    
+  
+    <form action="?path={{ current_dir_rel }}" method="post">  
+        {% csrf_token %}  
+        <label for="folderName">Create folder:</label>  
+        <input type="text" id="folderName" name="folder_name" required>  
+        <button type="submit">Create</button>  
+    </form>  
+  
+    <h3>Directories:</h3>  
+<ul>  
+    {% for dir in dirs %}  
+        {% with current_dir_rel|add:dir|add:'/' as folder_path %}  
+        <li>  
+            <input type="checkbox" class="item-checkbox folder-checkbox" data-name="{{ folder_path }}">  
+            <a href="?path={{ folder_path }}">{{ dir }}</a>  
+        </li>  
+        {% endwith %}  
+    {% endfor %}  
+</ul> 
+    
+    <h3>Files:</h3>  
+    <ul>  
+        {% for file in files %}  
+            <li>  
+                <input type="checkbox" class="item-checkbox file-checkbox" data-name="{{ current_dir_rel|add:file.name }}">  
+                <a href="{% url 'file_view' path=current_dir_rel|add:file.name|urlencode %}" target="_blank">{{ file.name }}</a>  
+                (Size: {{ file.size|filesizeformat }}, Last Accessed: {{ file.access_date }} ,Created: {{ file.creation_date }})  
+            </li>  
+        {% endfor %}  
+    </ul>  
+
+</body>  
+</html> 
