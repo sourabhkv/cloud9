@@ -204,6 +204,7 @@ from django.urls import reverse
   
 @login_required  
 def file_delete(request, path):  
+    print(path)
     try:  
         # Decode the path to handle spaces properly  
         decoded_path = unquote(path)  
@@ -352,7 +353,7 @@ def file_bulk_delete(request):
   
 import zipfile  
 from io import BytesIO  
-  
+from django.utils.encoding import smart_str  
 @login_required  
 def file_bulk_download(request):  
     if request.method == 'POST':  
@@ -361,11 +362,18 @@ def file_bulk_download(request):
             # If there's only one file, download it directly without zipping  
             decoded_path = unquote(paths[0])  
             file_path = safe_join('media', request.user.username, decoded_path)  
+            print(f"File path: {file_path}")  # Debugging statement  
+  
             if os.path.exists(file_path) and os.path.isfile(file_path):  
                 with open(file_path, 'rb') as file:  
                     file_data = file.read()  
+  
+                # Sanitize the filename by replacing problematic characters  
+                filename = os.path.basename(file_path)  
+                safe_filename = filename.replace(':', '_').replace(' ', '_')  
+  
                 response = HttpResponse(file_data, content_type='application/octet-stream')  
-                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'  
+                response['Content-Disposition'] = f'attachment; filename="{smart_str(quote(safe_filename))}"'  
                 return response  
             else:  
                 return HttpResponseBadRequest("File not found")  
