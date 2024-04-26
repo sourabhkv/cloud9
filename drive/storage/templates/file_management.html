@@ -4,8 +4,11 @@
     <meta charset="UTF-8">  
     <title>File Management</title>  
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <link rel="stylesheet" href="/static/css/file_mgtStyle.css" /> 
+    
 </head>  
-<body>  
+<body>
+    <a href="{% url 'home' %}">Home</a>
     <h1>File Management</h1>  
     <h2>Current Directory: {{ current_dir_rel }}</h2>  
     
@@ -34,13 +37,6 @@
         <input type="hidden" id="download-paths" name="paths">  
     </form>  
     
-
-    <div id="action-bar">  
-        <button id="delete-btn" onclick="deleteSelected()" style="display:none;">Delete</button>  
-        <button id="download-btn" onclick="downloadSelected()" style="display:none;">Download</button>  
-        <button id="rename-btn" onclick="renameSelected()" style="display:none;">Rename</button>  
-        <button id="download-folder-btn" onclick="downloadFolder()" style="display:none;">Download Folder</button>
-    </div> 
   
     <form id="file-upload-form" action="?path={{ current_dir_rel }}" method="post" enctype="multipart/form-data">  
         {% csrf_token %}  
@@ -71,29 +67,60 @@
         <input type="text" id="folderName" name="folder_name" required>  
         <button type="submit">Create</button>  
     </form>  
+    <br>
+
+    <div id="action-bar">  
+        <button id="delete-btn" onclick="deleteSelected()" class="action-btn delete-btn" style="display:none;">Delete</button>  
+        <button id="download-btn" onclick="downloadSelected()" class="action-btn download-btn" style="display:none;">Download</button>  
+        <button id="rename-btn" onclick="renameSelected()" class="action-btn rename-btn" style="display:none;">Rename</button>  
+        <button id="download-folder-btn" onclick="downloadFolder()" class="action-btn download-folder-btn" style="display:none;">Download Folder</button>
+    </div>
   
     <h3>Directories:</h3>  
-<ul>  
-    {% for dir in dirs %}  
-        {% with current_dir_rel|add:dir|add:'/' as folder_path %}  
-        <li>  
-            <input type="checkbox" class="item-checkbox folder-checkbox" data-name="{{ folder_path }}">  
-            <a href="?path={{ folder_path }}">{{ dir }}</a>  
-        </li>  
-        {% endwith %}  
-    {% endfor %}  
-</ul> 
+    <table>  
+        <thead>
+            <tr>
+                <th>Directory</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dir in dirs %}  
+                {% with current_dir_rel|add:dir|add:'/' as folder_path %}  
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="item-checkbox folder-checkbox" data-name="{{ folder_path }}">  
+                            <a href="?path={{ folder_path }}">{{ dir }}</a>
+                        </td>
+                    </tr>  
+                {% endwith %}  
+            {% endfor %}  
+        </tbody>
+    </table>
     
     <h3>Files:</h3>  
-    <ul>  
-        {% for file in files %}  
-            <li>  
-                <input type="checkbox" class="item-checkbox file-checkbox" data-name="{{ current_dir_rel|add:file.name }}">  
-                <a href="{% url 'file_view' path=current_dir_rel|add:file.name|urlencode %}" target="_blank">{{ file.name }}</a>  
-                (Size: {{ file.size|filesizeformat }}, Last Accessed: {{ file.access_date }} ,Created: {{ file.creation_date }})  
-            </li>  
-        {% endfor %}  
-    </ul>  
+    <table>  
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Size</th>
+                <th>Last Accessed</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file in files %}  
+                <tr>
+                    <td>
+                        <input type="checkbox" class="item-checkbox file-checkbox" data-name="{{ current_dir_rel|add:file.name }}">  
+                        <a href="{% url 'file_view' path=current_dir_rel|add:file.name|urlencode %}" target="_blank">{{ file.name }}</a>  
+                    </td>
+                    <td>{{ file.size|filesizeformat }}</td>
+                    <td>{{ file.access_date }}</td>
+                    <td>{{ file.creation_date }}</td>
+                </tr>  
+            {% endfor %}  
+        </tbody>
+    </table>
 
     
   

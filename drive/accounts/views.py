@@ -66,3 +66,25 @@ def login_view(request):
 def logout_view(request):  
     logout(request) 
     return redirect('login')
+
+from django.shortcuts import render
+import shutil
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        # Delete the user's directory in the media folder
+        user_media_path = os.path.join(settings.MEDIA_ROOT, request.user.username)
+        print(user_media_path)
+        if os.path.exists(user_media_path):
+            shutil.rmtree(user_media_path)
+
+        # Delete the user account
+        request.user.delete()
+
+        messages.success(request, "Your account has been deleted.")
+        return redirect('signup')  # Redirect to signup page after account deletion
+    else:
+        # For GET request, return a confirmation page
+        return render(request, 'confirm_delete.html')

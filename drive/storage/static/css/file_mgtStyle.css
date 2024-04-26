@@ -1,0 +1,54 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+.action-btn {
+border: none;
+border-radius: 5px;
+padding: 10px 20px;
+cursor: pointer;
+margin-right: 10px;
+font-weight: bold;
+}
+
+.delete-btn {
+background-color: #e74c3c; /* Red color for delete button */
+color: white;
+}
+
+.download-btn {
+background-color: #27ae60; /* Green color for download button */
+color: white;
+}
+
+.rename-btn {
+background-color: #3498db; /* Blue color for rename button */
+color: white;
+}
+
+.download-folder-btn {
+background-color: #f39c12; /* Yellowish color for download folder button */
+color: white;
+}

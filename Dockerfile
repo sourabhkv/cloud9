@@ -26,6 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt
   
 # Expose the port the app runs on  
 EXPOSE 80  
+EXPOSE 2121
   
 # Run django development server  
 CMD ["python", "manage.py", "runserver", "0.0.0.0:80"]  
