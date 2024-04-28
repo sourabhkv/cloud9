@@ -3,8 +3,17 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User  
 from django.contrib.auth import authenticate, login, logout  
 from django.contrib import messages  # Import messages  
-import os
+import os, hashlib
 from django.conf import settings
+
+def hashed_dir(s):
+    # Create a hash object
+    hash_object = hashlib.sha256(s.encode())
+
+    # Get the hexadecimal representation of the hash
+    hex_dig = hash_object.hexdigest()
+
+    return hex_dig
 
 def signup_view(request):  
     if request.method == 'POST':  
@@ -30,7 +39,7 @@ def signup_view(request):
         user.save()  
   
         # Create a directory for the user in the media folder  
-        user_media_path = os.path.join(settings.MEDIA_ROOT, email)  
+        user_media_path = os.path.join(settings.MEDIA_ROOT, hashed_dir(email))
         if not os.path.exists(user_media_path):  
             os.makedirs(user_media_path)  
   
@@ -75,7 +84,7 @@ from django.contrib.auth.decorators import login_required
 def delete_account(request):
     if request.method == 'POST':
         # Delete the user's directory in the media folder
-        user_media_path = os.path.join(settings.MEDIA_ROOT, request.user.username)
+        user_media_path = os.path.join(settings.MEDIA_ROOT, hashed_dir(request.user.username))
         print(user_media_path)
         if os.path.exists(user_media_path):
             shutil.rmtree(user_media_path)

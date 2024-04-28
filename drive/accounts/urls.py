@@ -1,7 +1,7 @@
 # accounts/urls.py  
 from django.urls import path
 from . import views  
-  
+
 urlpatterns = [  
     path('signup/', views.signup_view, name='signup'),  
     path('login/', views.login_view, name='login'),  
@@ -10,12 +10,19 @@ urlpatterns = [
 ]  
 
 import time
-import threading
+import threading, hashlib
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
 from django.contrib.auth.models import User
+def hashed_dir(s):
+    # Create a hash object
+    hash_object = hashlib.sha256(s.encode())
 
+    # Get the hexadecimal representation of the hash
+    hex_dig = hash_object.hexdigest()
+
+    return hex_dig
 
 def setup_ftp_server():
     # Instantiate a dummy authorizer to manage 'virtual' users
@@ -40,7 +47,7 @@ def setup_ftp_server():
             username = user.username
             password = user.password
             #print(username,password)
-            homedir = f"./media/{username}"  # Update this path as needed
+            homedir = f"./media/{hashed_dir(username)}"  # Update this path as needed
 
             # Check if user already exists, if not add user to authorizer with full r/w permissions
             if not authorizer.has_user(username):
@@ -52,5 +59,5 @@ def setup_ftp_server():
         # Sleep for a while before checking for new users again
         time.sleep(60)  # Update this as needed
 
-_server_thread = threading.Thread(target=setup_ftp_server)
-_server_thread.start()
+#_server_thread = threading.Thread(target=setup_ftp_server)
+#_server_thread.start()

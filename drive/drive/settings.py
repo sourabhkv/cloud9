@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-3i2!c8=@o=#z5zow^=&!t0c*homv9(nm)h)z!q79ayi2&*4mt(
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["https://car-price.azurewebsites.net",'http://0.0.0.0']
+CSRF_TRUSTED_ORIGINS = ["https://car-price.azurewebsites.net",'http://0.0.0.0','https://mytestcloudbyoc.azurewebsites.net']
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 500
 

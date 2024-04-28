@@ -76,51 +76,52 @@
         <button id="download-folder-btn" onclick="downloadFolder()" class="action-btn download-folder-btn" style="display:none;">Download Folder</button>
     </div>
   
-    <h3>Directories:</h3>  
-    <table>  
-        <thead>
-            <tr>
-                <th>Directory</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for dir in dirs %}  
-                {% with current_dir_rel|add:dir|add:'/' as folder_path %}  
-                    <tr>
-                        <td>
-                            <input type="checkbox" class="item-checkbox folder-checkbox" data-name="{{ folder_path }}">  
-                            <a href="?path={{ folder_path }}">{{ dir }}</a>
-                        </td>
-                    </tr>  
-                {% endwith %}  
-            {% endfor %}  
-        </tbody>
-    </table>
-    
-    <h3>Files:</h3>  
-    <table>  
-        <thead>
-            <tr>
-                <th>File</th>
-                <th>Size</th>
-                <th>Last Accessed</th>
-                <th>Created</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for file in files %}  
+    <h3>Directories ({{ num_dirs }})</h3>  
+<table>  
+    <thead>
+        <tr>
+            <th>Directory</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dir in dirs %}  
+            {% with current_dir_rel|add:dir|add:'/' as folder_path %}  
                 <tr>
                     <td>
-                        <input type="checkbox" class="item-checkbox file-checkbox" data-name="{{ current_dir_rel|add:file.name }}">  
-                        <a href="{% url 'file_view' path=current_dir_rel|add:file.name|urlencode %}" target="_blank">{{ file.name }}</a>  
+                        <input type="checkbox" class="item-checkbox folder-checkbox" data-name="{{ folder_path }}">  
+                        <a href="?path={{ folder_path }}">{{ dir }}</a>
                     </td>
-                    <td>{{ file.size|filesizeformat }}</td>
-                    <td>{{ file.access_date }}</td>
-                    <td>{{ file.creation_date }}</td>
                 </tr>  
-            {% endfor %}  
-        </tbody>
-    </table>
+            {% endwith %}  
+        {% endfor %}  
+    </tbody>
+</table>
+
+<h3>Files ({{ num_files }})</h3>  
+<table>  
+    <thead>
+        <tr>
+            <th>File</th>
+            <th>Size</th>
+            <th>Last Accessed</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in files %}  
+            <tr>
+                <td>
+                    <input type="checkbox" class="item-checkbox file-checkbox" data-name="{{ current_dir_rel|add:file.name }}">  
+                    <a href="{% url 'file_view' path=current_dir_rel|add:file.name|urlencode %}" target="_blank">{{ file.name }}</a>  
+                </td>
+                <td>{{ file.size|filesizeformat }}</td>
+                <td>{{ file.access_date }}</td>
+                <td>{{ file.creation_date }}</td>
+            </tr>  
+        {% endfor %}  
+    </tbody>
+</table>
+
 
     
   

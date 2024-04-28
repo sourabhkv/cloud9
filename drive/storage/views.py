@@ -18,7 +18,16 @@ from io import BytesIO
 import zipfile  
 from datetime import datetime  
   
-import requests  ,threading
+import requests  ,threading, hashlib
+
+def hashed_dir(s):
+    # Create a hash object
+    hash_object = hashlib.sha256(s.encode())
+
+    # Get the hexadecimal representation of the hash
+    hex_dig = hash_object.hexdigest()
+
+    return hex_dig
 
 def process_url_download_file(url_download_file, current_dir_abs):  
     # Read the contents of URL_DOWNLOAD.txt  
@@ -101,9 +110,7 @@ def get_download_progress(request):
 from django.http import HttpResponseForbidden
 @login_required  
 def file_management(request):  
-    base_user_dir = os.path.join('media', request.user.username)  
-    # Remove access to higher directories, removing it may grant access to the root directory,vulnerable to directory traversal attacks,
-    # removing this block of code allows file uploads to root directory, but file downloads are not allowed from root.
+    base_user_dir = os.path.join('media', hashed_dir(request.user.username))  
     current_dir_rel = request.GET.get('path', '')  
     if current_dir_rel.startswith('/'):
         return HttpResponseForbidden("Access to the root directory is not allowed.")  
@@ -124,9 +131,7 @@ def file_management(request):
                 if f.name.lower() == 'url_download.txt':  
                     url_download_file = f  
   
-            # If URL_DOWNLOAD.txt was uploaded, process it in a separate thread  
             if url_download_file:  
-                # Pass the user_id to the process_url_download_file function  
                 user_id = request.user.id  
                 download_thread = threading.Thread(  
                     target=process_url_download_file,  
@@ -161,7 +166,10 @@ def file_management(request):
         'dirs': dirs,  
         'current_dir_rel': current_dir_rel,  
         'parent_dir_rel': parent_dir_rel,  
+        'num_files': len(files_data),
+        'num_dirs': len(dirs),
     })  
+
 
 
 @login_required
@@ -177,7 +185,7 @@ def file_download(request, path):
         # Decode the path to handle spaces and other URL-encoded characters properly
         decoded_path = unquote(path)
         # Construct the absolute file path
-        file_path = safe_join('media', request.user.username, decoded_path)
+        file_path = safe_join('media', hashed_dir(request.user.username), decoded_path)
 
         # Check if the file exists and is a regular file
         if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -208,7 +216,7 @@ def file_delete(request, path):
     try:  
         # Decode the path to handle spaces properly  
         decoded_path = unquote(path)  
-        file_path = safe_join('media', request.user.username, decoded_path)  
+        file_path = safe_join('media', hashed_dir(request.user.username), decoded_path)  
   
         if os.path.exists(file_path) and os.path.isfile(file_path):  
             os.remove(file_path)  
@@ -225,7 +233,7 @@ def file_delete(request, path):
 @login_required  
 def file_view(request, path):  
     decoded_path = unquote(path)  
-    file_path = safe_join('media', request.user.username, decoded_path)  
+    file_path = safe_join('media', hashed_dir(request.user.username), decoded_path)  
     print(file_path)
   
     if not os.path.exists(file_path) or not os.path.isfile(file_path):  
@@ -271,7 +279,7 @@ def file_view(request, path):
 def create_folder(request):  
     if request.method == 'POST':  
         folder_name = request.POST.get('folder_name')  
-        user_dir = os.path.join('media', request.user.username)  
+        user_dir = os.path.join('media', hashed_dir(request.user.username))  
         folder_path = os.path.join(user_dir, folder_name)  
         if not os.path.exists(folder_path):  
             os.makedirs(folder_path)  
@@ -283,7 +291,7 @@ def create_folder(request):
 @login_required  
 def delete_folder(request, path):  
 
-    user_dir = os.path.join('media', request.user.username)  
+    user_dir = os.path.join('media', hashed_dir(request.user.username))  
     folder_path = safe_join(user_dir, path)  
 
     if os.path.exists(folder_path) and os.path.isdir(folder_path):  
@@ -309,8 +317,8 @@ def rename_item(request):
         path = request.GET.get('path')  
         new_name = request.GET.get('new_name')  
           
-        current_path = safe_join('media', request.user.username, path)  
-        new_path = safe_join('media', request.user.username, new_name)  
+        current_path = safe_join('media', hashed_dir(request.user.username), path)  
+        new_path = safe_join('media', hashed_dir(request.user.username), new_name)  
           
         if os.path.exists(current_path):  
             try:  
@@ -333,7 +341,7 @@ def file_bulk_delete(request):
           
         for path in paths:  
             decoded_path = unquote(path)  
-            file_path = safe_join('media', request.user.username, decoded_path)  
+            file_path = safe_join('media', hashed_dir(request.user.username), decoded_path)  
             if os.path.exists(file_path):  
                 if os.path.isfile(file_path):  
                     os.remove(file_path)  
@@ -361,7 +369,7 @@ def file_bulk_download(request):
         if len(paths) == 1:  
             # If there's only one file, download it directly without zipping  
             decoded_path = unquote(paths[0])  
-            file_path = safe_join('media', request.user.username, decoded_path)  
+            file_path = safe_join('media', hashed_dir(request.user.username), decoded_path)  
             print(f"File path: {file_path}")  # Debugging statement  
   
             if os.path.exists(file_path) and os.path.isfile(file_path):  
@@ -383,7 +391,7 @@ def file_bulk_download(request):
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:  
                 for path in paths:  
                     decoded_path = unquote(path)  
-                    file_path = safe_join('media', request.user.username, decoded_path)  
+                    file_path = safe_join('media', hashed_dir(request.user.username), decoded_path)  
                     if os.path.exists(file_path) and os.path.isfile(file_path):  
                         with open(file_path, 'rb') as file:  
                             file_data = file.read()  
@@ -403,7 +411,7 @@ def file_bulk_download(request):
 def folder_upload(request):  
     if request.method == 'POST':  
         current_dir_rel = request.POST.get('current_dir', '')  # Retrieve the current directory from the form  
-        base_user_dir = os.path.join('media', request.user.username)  
+        base_user_dir = os.path.join('media', hashed_dir(request.user.username))  
         target_dir_abs = os.path.join(base_user_dir, current_dir_rel)  
   
         folder_files = request.FILES.getlist('folders')  # 'folders' is the name attribute in the form  
@@ -428,7 +436,7 @@ def folder_upload(request):
 
 @login_required  
 def folder_download(request, path):  
-    user_dir = os.path.join('media', request.user.username)  
+    user_dir = os.path.join('media', hashed_dir(request.user.username))  
     folder_path = safe_join(user_dir, path)  
   
     if os.path.exists(folder_path) and os.path.isdir(folder_path):  
@@ -459,7 +467,7 @@ def execute_command(request):
     if request.method == 'POST':  
         command = request.POST.get('command')  
         current_dir_rel = request.POST.get('current_dir')  
-        base_user_dir = safe_join('media', request.user.username)  
+        base_user_dir = safe_join('media', hashed_dir(request.user.username))  
         current_dir_abs = safe_join(base_user_dir, current_dir_rel)  
   
         # Check the operating system and set the executable name  
