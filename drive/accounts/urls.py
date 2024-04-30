@@ -30,9 +30,10 @@ def setup_ftp_server():
 
     # Define the FTP handler class
     handler = FTPHandler
+    handler.passive_ports = range(50000, 50011)  
 
     # Define the server address and the server port
-    server = FTPServer(("0.0.0.0", 2121), handler)
+    server = FTPServer(('', 2121), handler)
 
     # Start the FTP server in a separate thread
     server_thread = threading.Thread(target=server.serve_forever)
@@ -59,5 +60,5 @@ def setup_ftp_server():
         # Sleep for a while before checking for new users again
         time.sleep(60)  # Update this as needed
 
-#_server_thread = threading.Thread(target=setup_ftp_server)
-#_server_thread.start()
+_server_thread = threading.Thread(target=setup_ftp_server)
+_server_thread.start()
