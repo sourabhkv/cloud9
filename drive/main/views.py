@@ -37,8 +37,7 @@ def home(request):
 
     context = {
         'user': request.user,
-        'folder_size': folder_size,
-        'hashed_password': request.user.password
+        'folder_size': folder_size
     }  
     return render(request, 'home.html', context)
 

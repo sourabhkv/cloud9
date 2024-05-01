@@ -69,13 +69,7 @@ ftp.exe does not support passive ports properly even after enabling passive port
 storage sense - capping storage limit for users<br>
 Sharing at network, user level
 
-docker build -t chatapp .<br>
-docker run -p 8000:80 -p 2121:2121 chatapp<br>
-docker tag chatapp sourabhkv/chatapp:1.6<br>
-docker push sourabhkv/chatapp:1.6
-
-
-docker build -t chatapp .<br>
-docker run -p 8000:80 -p 2121:2121 chatapp<br>
-docker tag chatapp sourabhkv/chatapp:1.6<br>
-docker push sourabhkv/chatapp:1.6
+docker build -t cloud9 .<br>
+docker run -p 8000:80 -p 2121:2121 -p 50000-50010:50000-50010 cloud9<br>
+docker tag cloud9 sourabhkv/cloud9:1.0<br>
+docker push sourabhkv/cloud9:1.0

@@ -5,15 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages  # Import messages  
 import os, hashlib
 from django.conf import settings
+from .ftp_server import authorizer, hashed_dir
 
-def hashed_dir(s):
-    # Create a hash object
-    hash_object = hashlib.sha256(s.encode())
-
-    # Get the hexadecimal representation of the hash
-    hex_dig = hash_object.hexdigest()
-
-    return hex_dig
 
 def signup_view(request):  
     if request.method == 'POST':  
@@ -42,6 +35,7 @@ def signup_view(request):
         user_media_path = os.path.join(settings.MEDIA_ROOT, hashed_dir(email))
         if not os.path.exists(user_media_path):  
             os.makedirs(user_media_path)  
+            authorizer.add_user(email, password1, user_media_path, perm='elradfmwM')  
   
         # Automatically log the user in after signup  
         new_user = authenticate(username=email, password=password1)  
@@ -90,6 +84,9 @@ def delete_account(request):
             shutil.rmtree(user_media_path)
 
         # Delete the user account
+        # Remove user from FTP server  
+        if authorizer.has_user(request.user.username):  
+            authorizer.remove_user(request.user.username)
         request.user.delete()
 
         messages.success(request, "Your account has been deleted.")
